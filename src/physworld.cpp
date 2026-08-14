@@ -7,7 +7,7 @@ const std::vector<Ball>& PhysWorld::getBalls(void) const { return _balls; }
 
 void PhysWorld::update(double dt) {
 
-	const double floor = 600;
+	const double floor = 0.0;
 
 	for (auto& ball : _balls) {
 
@@ -15,10 +15,10 @@ void PhysWorld::update(double dt) {
 		ball.physProp.pos += ball.physProp.vel * dt;
 		
 		//Check floor collision
-		double bottomEdge = ball.physProp.pos.y + ball.radius;
-		if (bottomEdge >= floor) {
-			ball.physProp.pos.y = floor - ball.radius;
-			if (ball.physProp.vel.y > 0.0) {
+		double bottomEdge = ball.physProp.pos.y - ball.radius;
+		if (bottomEdge <= floor) {
+			ball.physProp.pos.y = floor + ball.radius;
+			if (ball.physProp.vel.y < 0.0) {
 				ball.physProp.vel.y *= -ball.physProp.bounce;
 			}
 		}

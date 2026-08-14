@@ -11,6 +11,22 @@
 #include <SFML/Window.hpp>
 #include <optional>
 
+float Game::toPixels(double meters) { return static_cast<float>(meters * 50); }
+
+double Game::toMeters(float pixels) { return static_cast<double>(pixels / 50); }
+
+sf::Vector2f Game::toScreenPos(Vec2D pos) {
+    float x = static_cast<float>(pos.x * 50);
+    float y = static_cast<float>(pos.y * 50);
+    return sf::Vector2f{x, 600.f - y };
+}
+
+Vec2D Game::toWorldPos(sf::Vector2i pos) {
+    double x = static_cast<double>(pos.x) / 50.0;
+    double y = static_cast<double>(pos.y) / 50.0;
+    return Vec2D{x, 600.0/50.0 - y};
+}
+
 int Game::run(void) {
 
     isRunning = true;
@@ -66,9 +82,7 @@ void Game::processInput() {
             window.close();
 
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-            double x = static_cast<double>(mouseButtonPressed->position.x);
-            double y = static_cast<double>(mouseButtonPressed->position.y);
-            _world.add(5,{{x,y}, 1.0, 0.7});
+            _world.add(0.5,{toWorldPos(mouseButtonPressed->position), 1.0, 0.7});
         }
     
     }
@@ -80,10 +94,11 @@ void Game::render(double alpha) {
     window.clear(sf::Color::Black);
 
     for (auto& ball : _world.getBalls()) {
-        sf::CircleShape shape(ball.radius);
+        float radius = toPixels(ball.radius);
+        sf::CircleShape shape(radius);
         shape.setFillColor(sf::Color(100,255,50));
-        sf::Vector2f position{static_cast<float>(ball.physProp.pos.x), static_cast<float>(ball.physProp.pos.y)};
-        shape.setPosition(position);
+        shape.setOrigin({radius,radius});
+        shape.setPosition(toScreenPos(ball.physProp.pos));
         window.draw(shape);
     }
 

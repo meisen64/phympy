@@ -12,6 +12,14 @@ class Game {
 
     sf::RenderWindow window;
 
+    float toPixels(double);
+
+    double toMeters(float);
+
+    sf::Vector2f toScreenPos(Vec2D);
+
+    Vec2D toWorldPos(sf::Vector2i);
+
 public:
 
     int run(void);
