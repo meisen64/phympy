@@ -1,0 +1,25 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Local IDE/Compiler Caches
+.cache/
+.vscode/
+.idea/
+
+# Build Directories
+build/
+bin/
+out/
+
+# Executables
+*.exe
+*.out
+*.app
