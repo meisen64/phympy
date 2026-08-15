@@ -4,41 +4,45 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/ContextSettings.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <chrono>
 #include <iostream>
 #include <SFML/Window.hpp>
 #include <optional>
 
-float Game::toPixels(double meters) { return static_cast<float>(meters * 50); }
+Game::Game(sf::Vector2u ws) : windowSize(ws) {}
 
-double Game::toMeters(float pixels) { return static_cast<double>(pixels / 50); }
+float Game::toPixels(double meters) { return static_cast<float>(meters * PPM); }
+
+double Game::toMeters(float pixels) { return static_cast<double>(pixels / PPM); }
 
 sf::Vector2f Game::toScreenPos(Vec2D pos) {
-    float x = static_cast<float>(pos.x * 50);
-    float y = static_cast<float>(pos.y * 50);
-    return sf::Vector2f{x, 600.f - y };
+    float x = static_cast<float>(pos.x * PPM);
+    float y = static_cast<float>(pos.y * PPM);
+    return sf::Vector2f{x, static_cast<float>(windowSize.y) - y };
 }
 
 Vec2D Game::toWorldPos(sf::Vector2i pos) {
-    double x = static_cast<double>(pos.x) / 50.0;
-    double y = static_cast<double>(pos.y) / 50.0;
-    return Vec2D{x, 600.0/50.0 - y};
+    double x = static_cast<double>(pos.x) / PPM;
+    double y = static_cast<double>(pos.y) / PPM;
+    return Vec2D{x, static_cast<double>(windowSize.y)/PPM - y};
 }
 
 int Game::run(void) {
 
     isRunning = true;
 
-    window.create(sf::VideoMode({800,600}), "game window");
+    world.setMapSize({static_cast<double>(windowSize.x), static_cast<double>(windowSize.y)});
+
+    sf::ContextSettings settings;
+    settings.antiAliasingLevel = 8;
+    window.create(sf::VideoMode(windowSize), "game window", sf::Style::Default, sf::State::Windowed, settings);
     window.setFramerateLimit(60);
 
     using clock = std::chrono::high_resolution_clock;
-
-    constexpr double FIXED_DT = 1.0 / 60.0; //60hz physics updates - 0.01667s
-
-    constexpr double MAX_FRAME_TIME = 0.25; //250ms max accumulated time
 
     auto previous_time = clock::now();
 
@@ -59,7 +63,7 @@ int Game::run(void) {
 
         //Fixed physics step consuption
         while (accumulator >= FIXED_DT) {
-            _world.update(FIXED_DT);
+            world.update(FIXED_DT);
             accumulator -= FIXED_DT;
         }
 
@@ -82,7 +86,13 @@ void Game::processInput() {
             window.close();
 
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-            _world.add(0.5,{toWorldPos(mouseButtonPressed->position), 1.0, 0.7});
+            world.add(0.125,{toWorldPos(mouseButtonPressed->position), 1.0, 0.7});
+        }
+
+        if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Z && keyPressed->control) {
+                world.removeLast();
+            }
         }
     
     }
@@ -93,7 +103,7 @@ void Game::render(double alpha) {
 
     window.clear(sf::Color::Black);
 
-    for (auto& ball : _world.getBalls()) {
+    for (auto& ball : world.getBalls()) {
         float radius = toPixels(ball.radius);
         sf::CircleShape shape(radius);
         shape.setFillColor(sf::Color(100,255,50));
