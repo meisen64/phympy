@@ -1,5 +1,6 @@
 //game.cpp
 #include "game.hpp"
+#include "vec2d.hpp"
 //#include "vec2d.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -35,7 +36,7 @@ int Game::run(void) {
 
     isRunning = true;
 
-    world.setMapSize({static_cast<double>(windowSize.x), static_cast<double>(windowSize.y)});
+    world.setMapSize({toMeters(windowSize.x), toMeters(windowSize.y)});
 
     sf::ContextSettings settings;
     settings.antiAliasingLevel = 8;

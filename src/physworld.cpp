@@ -7,22 +7,37 @@ const std::vector<Ball>& PhysWorld::getBalls(void) const { return _balls; }
 
 void PhysWorld::update(double dt) {
 
-	const double floor = 0.0;
-
 	for (auto& ball : _balls) {
 
 		ball.physProp.vel += Vec2D{0,_gravity} * dt;
 		ball.physProp.pos += ball.physProp.vel * dt;
 		
-		//Check floor collision
-		double bottomEdge = ball.physProp.pos.y - ball.radius;
-		if (bottomEdge <= floor) {
-			ball.physProp.pos.y = floor + ball.radius;
+		//Check map edge collision
+		if (ball.physProp.pos.x <= ball.radius) {
+			ball.physProp.pos.x = ball.radius;
+			if (ball.physProp.vel.x < 0.0) {
+				ball.physProp.vel.x *= -ball.physProp.bounce;
+			}
+		}
+		if (ball.physProp.pos.x >= _mapSize.x - ball.radius) {
+			ball.physProp.pos.x = _mapSize.x - ball.radius;
+			if (ball.physProp.vel.x > 0.0) {
+				ball.physProp.vel.x *= -ball.physProp.bounce;
+			}
+		}
+		if (ball.physProp.pos.y <= ball.radius) {
+			ball.physProp.pos.y = ball.radius;
 			if (ball.physProp.vel.y < 0.0) {
 				ball.physProp.vel.y *= -ball.physProp.bounce;
 			}
 		}
-		//End floor collision
+		if (ball.physProp.pos.y >= _mapSize.y - ball.radius) {
+			ball.physProp.pos.y = _mapSize.y - ball.radius;
+			if (ball.physProp.vel.y > 0.0) {
+				ball.physProp.vel.y *= -ball.physProp.bounce;
+			}
+		}
+		//End map edge collision
 	}
 }
 
