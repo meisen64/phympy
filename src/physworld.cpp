@@ -48,7 +48,8 @@ void PhysWorld::update(double dt) {
 		for (size_t j = i + 1; j < _balls.size(); j++) {
 			Ball& ball2 = _balls.at(j);
 			
-			if ((ball2.physProp.pos - ball.physProp.pos).length() < (ball2.radius + ball.radius)) {
+			if ((ball2.physProp.pos - ball.physProp.pos).lengthSqr() < (ball2.radius + ball.radius) * (ball2.radius + ball.radius)) {
+				
 				//Initial object separation
 				Vec2D posA = ball.physProp.pos;
 				Vec2D posB = ball2.physProp.pos;
@@ -56,6 +57,15 @@ void PhysWorld::update(double dt) {
 				double overlap = (ball.radius + ball2.radius) - (posB - posA).length();
 				ball.physProp.pos -= collisionVec * (overlap / 2);
 				ball2.physProp.pos += collisionVec * (overlap / 2); 
+
+				//Compute impulse
+				double relVel = (ball2.physProp.vel - ball.physProp.vel).dot(collisionVec);
+				if (relVel >= 0) { continue; }
+				double impulse = ((1 + ball.physProp.bounce) * relVel) / (ball.physProp.iMass + ball2.physProp.iMass);
+
+				//Apply impulse to velocity
+				ball.physProp.vel += collisionVec * (impulse * ball.physProp.iMass);
+				ball2.physProp.vel -= collisionVec * (impulse * ball2.physProp.iMass);				
 
 			}
 		}
