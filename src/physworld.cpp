@@ -1,5 +1,8 @@
 #include "physworld.hpp"
+#include "ball.hpp"
 #include "vec2d.hpp"
+#include <cstddef>
+#include <iostream>
 
 PhysWorld::PhysWorld(double g, Vec2D v) : _gravity(g), _mapSize(v) {}
 
@@ -7,7 +10,9 @@ const std::vector<Ball>& PhysWorld::getBalls(void) const { return _balls; }
 
 void PhysWorld::update(double dt) {
 
-	for (auto& ball : _balls) {
+	for (size_t i = 0; i < _balls.size(); i++) {
+
+		Ball& ball = _balls.at(i);
 
 		ball.physProp.vel += Vec2D{0,_gravity} * dt;
 		ball.physProp.pos += ball.physProp.vel * dt;
@@ -38,6 +43,22 @@ void PhysWorld::update(double dt) {
 			}
 		}
 		//End map edge collision
+
+		//Collision detection
+		for (size_t j = i + 1; j < _balls.size(); j++) {
+			Ball& ball2 = _balls.at(j);
+			
+			if ((ball2.physProp.pos - ball.physProp.pos).length() < (ball2.radius + ball.radius)) {
+				//Initial object separation
+				Vec2D posA = ball.physProp.pos;
+				Vec2D posB = ball2.physProp.pos;
+				Vec2D collisionVec = (posB - posA).unit();
+				double overlap = (ball.radius + ball2.radius) - (posB - posA).length();
+				ball.physProp.pos -= collisionVec * (overlap / 2);
+				ball2.physProp.pos += collisionVec * (overlap / 2); 
+
+			}
+		}
 	}
 }
 

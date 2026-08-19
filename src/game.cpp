@@ -87,7 +87,7 @@ void Game::processInput() {
             window.close();
 
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-            world.add(0.125,{toWorldPos(mouseButtonPressed->position), 1.0, 0.7});
+            world.add(0.5,{toWorldPos(mouseButtonPressed->position), 1.0, 0.7});
         }
 
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
