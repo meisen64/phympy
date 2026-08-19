@@ -60,7 +60,7 @@ void PhysWorld::update(double dt) {
 
 				//Compute impulse
 				double relVel = (ball2.physProp.vel - ball.physProp.vel).dot(collisionVec);
-				if (relVel >= 0) { continue; }
+				if (relVel >= 0) { continue; } //If the balls are already moving apart for each other, continue.
 				double impulse = ((1 + ball.physProp.bounce) * relVel) / (ball.physProp.iMass + ball2.physProp.iMass);
 
 				//Apply impulse to velocity
